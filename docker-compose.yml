@@ -1,0 +1,29 @@
+services:
+  db-mysql:
+    image: mysql:5.7.40
+    restart: always
+    environment:
+      - MYSQL_DATABASE=laptopshop
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - LANG=C.UTF-8
+      - MYSQL_INITDB_CHARSET=utf8mb4
+    ports:
+      - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    expose:
+      - "3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$${MYSQL_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# The app service has been removed
+
+volumes:
+  db-data:
+
+# docker compose -p laptopshop up -d

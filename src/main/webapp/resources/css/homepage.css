@@ -1,0 +1,75 @@
+/* =========================
+   HOMEPAGE PRODUCT UI
+   ========================= */
+
+.fruite-item {
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+/* Card */
+.product-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 36px rgba(0,0,0,0.15);
+}
+
+/* Image */
+.product-img {
+    height: 190px;
+    object-fit: contain;
+    padding: 14px;
+    background: #fafafa;
+}
+
+/* Badge */
+.product-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #ffb703;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+/* Title */
+.product-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #222;
+    min-height: 42px;
+    line-height: 1.4;
+}
+
+/* Price */
+.product-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #e63946;
+    margin: 8px 0 12px;
+}
+
+/* Button */
+.btn-add-cart {
+    border: 1px solid #e63946;
+    background: #fff;
+    color: #e63946;
+    font-size: 13px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    transition: all 0.25s ease;
+}
+
+.btn-add-cart:hover {
+    background: #e63946;
+    color: #fff;
+}
