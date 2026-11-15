@@ -266,7 +266,8 @@
 
                                             <!-- Review Form -->
                                             <c:if test="${not empty pageContext.request.userPrincipal}">
-                                                <div class="review-form-card" id="review-form-container">
+                                                <p id="review-status" class="text-muted" role="status"></p>
+                                                <div class="review-form-card d-none" id="review-form-container">
                                                     <h5 class="review-form-title">
                                                         <i class="fas fa-pen me-2"></i>Viết đánh giá của bạn
                                                     </h5>

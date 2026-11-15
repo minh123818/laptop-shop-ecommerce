@@ -95,6 +95,10 @@ $(document).ready(function() {
         });
     }
 
+    function escapeHtml(value) {
+        return $('<div>').text(value).html();
+    }
+
     // Create review HTML
     function createReviewHtml(review) {
         var starsHtml = '';
@@ -134,7 +138,7 @@ $(document).ready(function() {
         // Handle comment
         var commentText = '';
         if (review.comment && review.comment.trim() !== '') {
-            commentText = review.comment;
+            commentText = escapeHtml(review.comment);
         } else {
             commentText = '<em class="text-muted">Không có nhận xét</em>';
         }
@@ -165,19 +169,22 @@ $(document).ready(function() {
             var adminName = review.adminName || 'Quản trị viên';
             adminReplyHtml = '<div class="admin-reply-box mt-3">' +
                 '<div class="admin-reply-header">' +
-                    '<span class="admin-reply-label"><i class="fas fa-store me-1"></i>Phản hồi từ ' + adminName + '</span>' +
+                    '<span class="admin-reply-label"><i class="fas fa-store me-1"></i>Phản hồi từ ' + escapeHtml(adminName) + '</span>' +
                     '<small class="text-muted">' + adminReplyDate + '</small>' +
                 '</div>' +
-                '<div class="admin-reply-content">' + review.adminReply + '</div>' +
+                '<div class="admin-reply-content">' + escapeHtml(review.adminReply) + '</div>' +
             '</div>';
         }
         
+        var purchaseBadge = review.verifiedPurchase === true
+            ? ' <span class="badge bg-success">Đã mua hàng</span>'
+            : '';
         var html = '<div class="review-item">' +
             '<div class="review-item-header">' +
                 '<div class="reviewer-info">' +
-                    '<div class="reviewer-avatar">' + userInitial + '</div>' +
+                    '<div class="reviewer-avatar">' + escapeHtml(userInitial) + '</div>' +
                     '<div>' +
-                        '<div class="reviewer-name">' + userName + '</div>' +
+                        '<div class="reviewer-name">' + escapeHtml(userName) + purchaseBadge + '</div>' +
                         '<div class="review-date">' + dateStr + '</div>' +
                     '</div>' +
                 '</div>' +
@@ -190,16 +197,30 @@ $(document).ready(function() {
         return html;
     }
 
-    // Check if user already reviewed
-    function checkUserReviewed() {
+    function showReviewStatus(message) {
+        $('#review-form-container').addClass('d-none');
+        $('#review-status').text(message);
+    }
+
+    function checkReviewEligibility() {
+        if (!$('#review-form-container').length) return;
+
         $.ajax({
             url: '/api/reviews/check?productId=' + productId,
             method: 'GET',
+            dataType: 'json',
             success: function(response) {
-                if (response.success && response.hasReviewed) {
-                    $('#review-form-container').addClass('d-none');
-                    $('#already-reviewed-msg').removeClass('d-none');
+                if (response.hasReviewed === true) {
+                    showReviewStatus('Bạn đã đánh giá sản phẩm này.');
+                } else if (response.canReview === true) {
+                    $('#review-status').empty();
+                    $('#review-form-container').removeClass('d-none');
+                } else {
+                    showReviewStatus('Bạn có thể đánh giá sản phẩm sau khi đơn hàng hoàn tất.');
                 }
+            },
+            error: function() {
+                showReviewStatus('Không thể kiểm tra điều kiện đánh giá. Vui lòng tải lại trang.');
             }
         });
     }
@@ -274,8 +295,7 @@ $(document).ready(function() {
                     });
                     
                     // Hide form and show message
-                    $('#review-form-container').addClass('d-none');
-                    $('#already-reviewed-msg').removeClass('d-none');
+                    showReviewStatus('Bạn đã đánh giá sản phẩm này.');
                     
                     // Reload reviews and rating
                     loadRatingSummary();
@@ -291,6 +311,7 @@ $(document).ready(function() {
             },
             error: function(xhr) {
                 const response = xhr.responseJSON;
+                if (xhr.status === 403) checkReviewEligibility();
                 $.toast({
                     heading: 'Lỗi',
                     text: response ? response.message : 'Có lỗi xảy ra, vui lòng thử lại',
@@ -312,5 +333,5 @@ $(document).ready(function() {
     // Initial load
     loadRatingSummary();
     loadReviews(1);
-    checkUserReviewed();
+    checkReviewEligibility();
 });

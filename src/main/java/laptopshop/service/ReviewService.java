@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import laptopshop.domain.User;
 import laptopshop.domain.dto.AverageRatingDTO;
 import laptopshop.domain.dto.ReviewRequestDTO;
 import laptopshop.domain.dto.ReviewResponseDTO;
+import laptopshop.repository.OrderDetailRepository;
 import laptopshop.repository.ProductRepository;
 import laptopshop.repository.ReviewRepository;
 import laptopshop.repository.UserRepository;
@@ -26,13 +28,16 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
     public ReviewService(ReviewRepository reviewRepository, 
                         UserRepository userRepository, 
-                        ProductRepository productRepository) {
+                        ProductRepository productRepository,
+                        OrderDetailRepository orderDetailRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.orderDetailRepository = orderDetailRepository;
     }
 
     /**
@@ -56,6 +61,10 @@ public class ReviewService {
             throw new IllegalStateException("Bạn đã đánh giá sản phẩm này rồi. Mỗi người chỉ được đánh giá 1 lần cho mỗi sản phẩm.");
         }
 
+        if (!hasCompletedPurchase(userId, product.getId())) {
+            throw new AccessDeniedException("Bạn chỉ có thể đánh giá sản phẩm sau khi đơn hàng hoàn tất.");
+        }
+
         // Create review
         Review review = Review.builder()
                 .rating(requestDTO.getRating())
@@ -63,6 +72,7 @@ public class ReviewService {
                 .user(user)
                 .product(product)
                 .visible(true)
+                .verifiedPurchase(true)
                 .build();
 
         Review savedReview = reviewRepository.save(review);
@@ -202,6 +212,11 @@ public class ReviewService {
         return reviewRepository.existsByUserIdAndProductId(userId, productId);
     }
 
+    @Transactional(readOnly = true)
+    public boolean hasCompletedPurchase(Long userId, Long productId) {
+        return orderDetailRepository.existsByOrder_User_IdAndProduct_IdAndOrder_Status(userId, productId, "COMPLETE");
+    }
+
     /**
      * Admin phản hồi review
      * @param reviewId ID của review
@@ -275,6 +290,7 @@ public class ReviewService {
                 .productName(review.getProduct().getName())
                 .createdAt(review.getCreatedAt())
                 .visible(review.getVisible())
+                .verifiedPurchase(Boolean.TRUE.equals(review.getVerifiedPurchase()))
                 .adminReply(review.getAdminReply())
                 .adminReplyAt(review.getAdminReplyAt())
                 .adminName(review.getAdmin() != null ? review.getAdmin().getFullName() : null)

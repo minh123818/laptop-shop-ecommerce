@@ -59,6 +59,8 @@ public class Review implements Serializable {
     @Builder.Default
     private Boolean visible = true;
 
+    private Boolean verifiedPurchase;
+
     // Admin reply fields
     @Column(columnDefinition = "TEXT")
     private String adminReply;

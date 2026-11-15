@@ -74,10 +74,10 @@
                                     <div class="review-header">
                                         <div class="customer-info">
                                             <div class="customer-avatar">
-                                                ${review.userFullName.substring(0, 1).toUpperCase()}
+                                                <c:out value="${empty review.userFullName ? '?' : review.userFullName.substring(0, 1).toUpperCase()}" />
                                             </div>
                                             <div>
-                                                <div class="customer-name">${review.userFullName}</div>
+                                                <div class="customer-name"><c:out value="${review.userFullName}" /></div>
                                                 <div class="review-meta">
                                                     <span class="rating-stars">
                                                         <c:forEach begin="1" end="${review.rating}">
@@ -113,7 +113,7 @@
                                             <c:choose>
                                                 <c:when test="${not empty review.comment}">
                                                     <i class="fas fa-quote-left text-muted me-2" style="font-size: 12px;"></i>
-                                                    ${review.comment}
+                                                    <c:out value="${review.comment}" />
                                                 </c:when>
                                                 <c:otherwise>
                                                     <em class="text-muted">

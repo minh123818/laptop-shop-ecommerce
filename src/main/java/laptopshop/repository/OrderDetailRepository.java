@@ -8,4 +8,6 @@ import laptopshop.domain.OrderDetail;
 @Repository
 public interface OrderDetailRepository extends JpaRepository<OrderDetail, Long> {
     void deleteByProduct(laptopshop.domain.Product product);
+
+    boolean existsByOrder_User_IdAndProduct_IdAndOrder_Status(Long userId, Long productId, String status);
 }

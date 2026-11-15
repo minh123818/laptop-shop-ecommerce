@@ -9,6 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -79,6 +80,11 @@ public class ReviewController {
                 "success", true,
                 "message", "Đánh giá sản phẩm thành công",
                 "data", responseDTO
+            ));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                "success", false,
+                "message", e.getMessage()
             ));
         } catch (IllegalStateException e) {
             return ResponseEntity.badRequest().body(Map.of(
@@ -207,10 +213,12 @@ public class ReviewController {
 
         long userId = (long) session.getAttribute("id");
         boolean hasReviewed = reviewService.hasUserReviewedProduct(userId, productId);
+        boolean canReview = !hasReviewed && reviewService.hasCompletedPurchase(userId, productId);
 
         return ResponseEntity.ok(Map.of(
             "success", true,
-            "hasReviewed", hasReviewed
+            "hasReviewed", hasReviewed,
+            "canReview", canReview
         ));
     }
 

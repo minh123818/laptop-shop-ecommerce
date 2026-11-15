@@ -23,6 +23,7 @@ public class ReviewResponseDTO {
     private String productName;
     private LocalDateTime createdAt;
     private Boolean visible;
+    private boolean verifiedPurchase;
     
     // Admin reply fields
     private String adminReply;
